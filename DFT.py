@@ -1,6 +1,7 @@
 import sys
 from PIL import Image
 import numpy as np
+import PIL
 
 fileName = sys.argv[1]
 outFileName = sys.argv[2]
@@ -28,4 +29,5 @@ if normalization == 0:
 imOut = imOut / normalization
 print("normalization = " + str(normalization))
 
-Image.fromarray((imOut*255.0).astype(np.uint8), mode="L").save(outFileName)
+# Save the dft image, making sure it's 128x128, since Stable_Fiddusion is 64x64
+Image.fromarray((imOut*255.0).astype(np.uint8), mode="L").resize((128,128), PIL.Image.NEAREST).save(outFileName)
