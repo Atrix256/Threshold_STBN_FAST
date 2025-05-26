@@ -7,7 +7,7 @@ fileName = sys.argv[1]
 outFileName = sys.argv[2]
 
 normalization = 0
-if len(sys.argv) > 4:
+if len(sys.argv) > 3 and sys.argv[3]:
     normalization = float(sys.argv[3])
 
 # load the image
@@ -23,11 +23,13 @@ dft = np.fft.fftshift(dft)
 
 # log and normalize
 imOut = np.log(1+dft)
+maxValue = np.max(imOut)
 if normalization == 0:
-    normalization = np.max(imOut)
+    normalization = maxValue
 
 imOut = imOut / normalization
-print("normalization = " + str(normalization))
+print(fileName + ": normalization = " + str(normalization) + "  maxValue = " + str(maxValue))
 
 # Save the dft image, making sure it's 128x128, since Stable_Fiddusion is 64x64
-Image.fromarray((imOut*255.0).astype(np.uint8), mode="L").resize((128,128), PIL.Image.NEAREST).save(outFileName)
+#Image.fromarray((imOut*255.0).astype(np.uint8), mode="L").resize((128,128), PIL.Image.NEAREST).save(outFileName)
+Image.fromarray((imOut*255.0).astype(np.uint8), mode="L").save(outFileName)

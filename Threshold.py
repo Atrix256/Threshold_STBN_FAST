@@ -17,4 +17,5 @@ if len(im.shape) > 2:
 im = np.where(im <= threshold, 0, 255)
 
 # Save the image, making sure it's 128x128, since Stable_Fiddusion is 64x64
-Image.fromarray(im.astype(np.uint8), mode="L").resize((128,128), PIL.Image.NEAREST).save(outFileName)
+#Image.fromarray(im.astype(np.uint8), mode="L").resize((128,128), PIL.Image.NEAREST).save(outFileName)
+Image.fromarray(im.astype(np.uint8), mode="L").save(outFileName)
