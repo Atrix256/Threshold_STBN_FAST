@@ -3,7 +3,7 @@ from PIL import Image, ImageDraw, ImageFont
 import PIL
 import os
 
-MakeThresholdsAndDFTs = False
+MakeThresholdsAndDFTs = True
 MakeDiagrams = True
 
 fontSize = 20
@@ -26,7 +26,11 @@ ThresholdList = {
 	"VNC/VNC10.png" : ["out/VNC10", "VNC 1.0 S"],
 	"VNC/VNC15.png" : ["out/VNC15", "VNC 1.5 S"],
 	"VNC/VNC19.png" : ["out/VNC19", "VNC 1.9 S"],
-	"tellusim/128x128_Crop.png" : ["out/Tellusim", "Tellusim ST"],
+	#"VNC/fbnt_128x128_10.png" : ["out/FreeBNT_10", "FreeBNT 1.0 S"],
+	#"VNC/fbnt_128x128_15.png" : ["out/FreeBNT_15", "FreeBNT 1.5 S"],
+	#"VNC/fbnt_128x128_19.png" : ["out/FreeBNT_19", "FreeBNT 1.9 S"],
+	#"tellusim/128x128_Crop.png" : ["out/Tellusim_8b", "Tell. 8b ST"],
+	"tellusim/128x128_16b_Crop.png" : ["out/Tellusim_16b", "Tellusim ST"],
 	"Stable_Fiddusion/64x64_Crop.png" : ["out/Stable_Fiddusion", "Fiddusion ST"],
 }
 
@@ -42,7 +46,11 @@ DFTList = {
 	"VNC/VNC10.png" : ["out/VNC10_Full.dft.png", "VNC 1.0 S"],
 	"VNC/VNC15.png" : ["out/VNC15_Full.dft.png", "VNC 1.5 S"],
 	"VNC/VNC19.png" : ["out/VNC19_Full.dft.png", "VNC 1.9 S"],
-	"tellusim/128x128_Crop.png" : ["out/Tellusim_Full.dft.png", "Tellusim ST"],	
+	#"VNC/fbnt_128x128_10.png" : ["out/fbnt_128x128_10_Full.dft.png", "FreeBNT 1.0 S"],
+	#"VNC/fbnt_128x128_15.png" : ["out/fbnt_128x128_15_Full.dft.png", "FreeBNT 1.5 S"],
+	#"VNC/fbnt_128x128_19.png" : ["out/fbnt_128x128_19_Full.dft.png", "FreeBNT 1.9 S"],
+	#"tellusim/128x128_Crop.png" : ["out/Tellusim_8b_Full.dft.png", "Tell. 8b ST"],
+	"tellusim/128x128_16b_Crop.png" : ["out/Tellusim_16b_Full.dft.png", "Tellusim ST"],
 	"Stable_Fiddusion/64x64_Crop.png" : ["out/Stable_Fiddusion_Full.dft.png", "Fiddusion ST"],
 }
 
@@ -107,7 +115,7 @@ if MakeDiagrams:
 	tileWidth = 128
 	tileHeight = 128
 	margin = 5
-	leftMargin = 35
+	leftMargin = 45
 	topMargin = 25
 
 	imageWidth = numCols * tileWidth + (numCols + 1) * margin + leftMargin
@@ -139,7 +147,10 @@ if MakeDiagrams:
 
 	row = 0
 	for ThresholdValue in ThresholdValues:
-		im1.text((0, topMargin + margin + row * (tileHeight + margin)), str(ThresholdValue), font = font1, align ="left", fill=(0))
+		label = str(ThresholdValue)
+		if label == "1":
+			label = "<= 1"
+		im1.text((margin, topMargin + margin + row * (tileHeight + margin)), label, font = font1, align ="left", fill=(0))
 		row = row + 1
 
 	imOut.save("out/_Threshold.png")
@@ -151,7 +162,7 @@ if MakeDiagrams:
 	tileWidth = 128
 	tileHeight = 128
 	margin = 5
-	leftMargin = 35
+	leftMargin = 45
 	topMargin = 25
 
 	imageWidth = numCols * tileWidth + (numCols + 1) * margin + leftMargin
@@ -179,21 +190,39 @@ if MakeDiagrams:
 
 	row = 0
 	for ThresholdValue in ThresholdValues:
-		im1.text((0, topMargin + margin + row * (tileHeight + margin)), str(ThresholdValue), font = font1, align ="left", fill=(0))
+		label = str(ThresholdValue)
+		if label == "1":
+			label = "<= 1"
+		im1.text((margin, topMargin + margin + row * (tileHeight + margin)), label, font = font1, align ="left", fill=(0))
 		row = row + 1
 
 	imOut.save("out/_ThresholdDFT.png")
 
-# TODO: why does STBN10_S_1.png have all the points at the bottom? seems like a bug. maybe related to void and cluster implementation. first 10% points initial binary pattern thing. maybe should threshold someone else's void and cluster.
-# TODO: why does purely spatial STBN not look the same as void and cluster? they should be equivelant.
+
+# TODO: why does purely spatial STBN not look the same as void and cluster? they should be equivelant. review how STBN works?
 
 '''
 NOTES:
-* mention this is one way to use scalar blue noise textures, so only one measure of quality.
+* low sigma VNC has problems with sparsity. the algorithm seems like it shouldn't. my impl and "free blue noise textures" impl both show it.
+* tellusim was 16 bit greyscale png. I opened in gimp, changed it to 8 bit. told it to use "linear", not sRGB.
+ * pretty much same difference.
+ * i did not do this, went with 16 bit greyscale! not apples to apples then but shrug.
+* void and cluster paper says use sigma 1.5.  "free blue noise textures" uses 1.9. I'm including 1.0 as well.
 * all DFTs normalized by same value: amplitude is divided by 6.2 to bring them all to be between 0 and 1.
 * stable-fiddusion was 64x64, resized thresholded images and DFTs to 128x128, but worked in 64x64.
 * Other blue noises came from:
  * https://tellusim.com/improved-blue-noise/
  * https://acko.net/blog/stable-fiddusion/
  * void and cluster  https://github.com/Atrix256/VoidAndCluster.git
+  * and "free blue noise textures" https://momentsingraphics.de/BlueNoise.html
+   * https://github.com/MomentsInGraphics/BlueNoise
+  * and paper: https://cv.ulichney.com/papers/1993-void-cluster.pdf
+
+Conclusions:
+* mention this is one way to use scalar blue noise textures, so only one measure of quality of blue noise. "quality is as quality does"
+* None seem to really do well at sparse counts like <= 1 which is 0.4% density. More do well at <= 10, which is 4% density.
+* Fiddusion has a very dark center which is great for filtering, but it does poorly on thresholding.
+ * Probably easier to optimize for a darker center if you don't consider thresholding.
+* adding temporal constraints decreases spatial quality
+ * FAST lets you give a weighting to space vs time. We gave each equal weighting.
 '''
