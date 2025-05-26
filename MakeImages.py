@@ -17,14 +17,17 @@ os.makedirs("out", exist_ok=True)
 DFTNormalization = "6.2"
 
 ThresholdList = {
-	"FAST_Sigma1_0/real_uniform_gauss1_0.png" : "out/FAST_S",
-	"FAST_Sigma1_0/real_uniform_gauss1_0_Gauss10_separate05_0.png" : "out/FAST_ST",
-	"STBN_Sigma1_0/stbn_scalar_2Dx1Dx1D_128x128x1x1_0.png" : "out/STBN10_S",
-	"STBN_Sigma1_0/stbn_scalar_2Dx1Dx1D_128x128x32x1_0.png" : "out/STBN10_ST",
-	"STBN_Sigma1_9/stbn_scalar_2Dx1Dx1D_128x128x1x1_0.png" : "out/STBN19_S",
-	"STBN_Sigma1_9/stbn_scalar_2Dx1Dx1D_128x128x32x1_0.png" : "out/STBN19_ST",
-	"Stable_Fiddusion/64x64_Crop.png" : "out/Stable_Fiddusion",
-	"tellusim/128x128_Crop.png" : "out/Tellusim",
+	"FAST_Sigma1_0/real_uniform_gauss1_0.png" : ["out/FAST_S", "FAST S"],
+	"FAST_Sigma1_0/real_uniform_gauss1_0_Gauss10_separate05_0.png" : ["out/FAST_ST", "FAST ST"],
+	"STBN_Sigma1_0/stbn_scalar_2Dx1Dx1D_128x128x1x1_0.png" : ["out/STBN10_S", "STBN 1.0 S"],
+	"STBN_Sigma1_0/stbn_scalar_2Dx1Dx1D_128x128x32x1_0.png" : ["out/STBN10_ST", "STBN 1.0 ST"],
+	"STBN_Sigma1_9/stbn_scalar_2Dx1Dx1D_128x128x1x1_0.png" : ["out/STBN19_S", "STBN 1.9 S"],
+	"STBN_Sigma1_9/stbn_scalar_2Dx1Dx1D_128x128x32x1_0.png" : ["out/STBN19_ST", "STBN 1.9 ST"],
+	"VNC/VNC10.png" : ["out/VNC10", "VNC 1.0 S"],
+	"VNC/VNC15.png" : ["out/VNC15", "VNC 1.5 S"],
+	"VNC/VNC19.png" : ["out/VNC19", "VNC 1.9 S"],
+	"tellusim/128x128_Crop.png" : ["out/Tellusim", "Tellusim ST"],
+	"Stable_Fiddusion/64x64_Crop.png" : ["out/Stable_Fiddusion", "Fiddusion ST"],
 }
 
 ThresholdValues = [1 , 2, 10, 26, 51, 77, 102, 128, 153, 179, 204, 230]
@@ -36,15 +39,19 @@ DFTList = {
 	"STBN_Sigma1_0/stbn_scalar_2Dx1Dx1D_128x128x32x1_0.png" : ["out/STBN10_ST_Full.dft.png", "STBN 1.0 ST"],
 	"STBN_Sigma1_9/stbn_scalar_2Dx1Dx1D_128x128x1x1_0.png" : ["out/STBN19_S_Full.dft.png", "STBN 1.9 S"],
 	"STBN_Sigma1_9/stbn_scalar_2Dx1Dx1D_128x128x32x1_0.png" : ["out/STBN19_ST_Full.dft.png", "STBN 1.9 ST"],
-	"Stable_Fiddusion/64x64_Crop.png" : ["out/Stable_Fiddusion_Full.dft.png", "Fiddusion"],
-	"tellusim/128x128_Crop.png" : ["out/Tellusim_Full.dft.png", "Tellusim"],
+	"VNC/VNC10.png" : ["out/VNC10_Full.dft.png", "VNC 1.0 S"],
+	"VNC/VNC15.png" : ["out/VNC15_Full.dft.png", "VNC 1.5 S"],
+	"VNC/VNC19.png" : ["out/VNC19_Full.dft.png", "VNC 1.9 S"],
+	"tellusim/128x128_Crop.png" : ["out/Tellusim_Full.dft.png", "Tellusim ST"],	
+	"Stable_Fiddusion/64x64_Crop.png" : ["out/Stable_Fiddusion_Full.dft.png", "Fiddusion ST"],
 }
 
 # Make thresholds and DFTs
 if MakeThresholdsAndDFTs:
 
 	# Thresholds
-	for fileName, outFileNameBase in ThresholdList.items():
+	for fileName, ThresholdInfo in ThresholdList.items():
+		outFileNameBase = ThresholdInfo[0]
 		for ThresholdValue in ThresholdValues:
 			result = subprocess.run(["python", "Threshold.py", fileName, outFileNameBase + "_" + str(ThresholdValue) + ".png", str(ThresholdValue) ], capture_output=True, text=True)
 			if result.stdout:
@@ -81,10 +88,10 @@ if MakeDiagrams:
 		outFileName = DFTDetails[0]
 		label = DFTDetails[1]
 
-		im = Image.open(fileName).resize((tileWidth,tileHeight), PIL.Image.NEAREST)
+		im = Image.open(fileName)#.resize((tileWidth,tileHeight), PIL.Image.NEAREST)
 		imOut.paste(im, (leftMargin + margin + col*(tileWidth + margin) , topMargin + margin))
 
-		im = Image.open(outFileName).resize((tileWidth,tileHeight), PIL.Image.NEAREST)
+		im = Image.open(outFileName)#.resize((tileWidth,tileHeight), PIL.Image.NEAREST)
 		imOut.paste(im, (leftMargin + margin + col*(tileWidth + margin) , topMargin + margin + tileHeight + margin))
 
 		im1.text((leftMargin + margin + col *(tileWidth + margin) , 0), label, font = font1, align ="left", fill=(0))
@@ -100,23 +107,35 @@ if MakeDiagrams:
 	tileWidth = 128
 	tileHeight = 128
 	margin = 5
-	leftMargin = 50
-	topMargin = 50
+	leftMargin = 35
+	topMargin = 25
 
 	imageWidth = numCols * tileWidth + (numCols + 1) * margin + leftMargin
 	imageHeight = numRows * tileHeight + (numRows + 1) * margin + topMargin
 
 	imOut = Image.new("L", (imageWidth, imageHeight), 255)
+	im1 = ImageDraw.Draw(imOut) 
 
 	row = 0
 	for ThresholdValue in ThresholdValues:
 		col = 0
-		for fileName, outFileNameBase in ThresholdList.items():
-			im = Image.open(outFileNameBase + "_" + str(ThresholdValue) + ".png").resize((tileWidth,tileHeight), PIL.Image.NEAREST)
+		for fileName, ThresholdInfo in ThresholdList.items():
+			outFileNameBase = ThresholdInfo[0]
+			im = Image.open(outFileNameBase + "_" + str(ThresholdValue) + ".png")#.resize((tileWidth,tileHeight), PIL.Image.NEAREST)
 			imOut.paste(im, (leftMargin + col*(tileWidth + margin) + margin, topMargin + row*(tileHeight + margin) + margin))
 			col = col + 1
 		row = row + 1
 
+	col = 0
+	for fileName, ThresholdInfo in ThresholdList.items():
+		label = ThresholdInfo[1]
+		im1.text((leftMargin + margin + col *(tileWidth + margin), 0), label, font = font1, align ="left", fill=(0))
+		col = col + 1
+
+	row = 0
+	for ThresholdValue in ThresholdValues:
+		im1.text((0, topMargin + margin + row * (tileHeight + margin)), str(ThresholdValue), font = font1, align ="left", fill=(0))
+		row = row + 1
 
 	imOut.save("out/_Threshold.png")
 
@@ -127,34 +146,51 @@ if MakeDiagrams:
 	tileWidth = 128
 	tileHeight = 128
 	margin = 5
-	leftMargin = 50
-	topMargin = 50
+	leftMargin = 35
+	topMargin = 25
 
 	imageWidth = numCols * tileWidth + (numCols + 1) * margin + leftMargin
 	imageHeight = numRows * tileHeight + (numRows + 1) * margin + topMargin
 
 	imOut = Image.new("L", (imageWidth, imageHeight), 255)
+	im1 = ImageDraw.Draw(imOut) 
 
 	row = 0
 	for ThresholdValue in ThresholdValues:
 		col = 0
-		for fileName, outFileNameBase in ThresholdList.items():
-			im = Image.open(outFileNameBase + "_" + str(ThresholdValue) + ".dft.png").resize((tileWidth,tileHeight), PIL.Image.NEAREST)
+		for fileName, ThresholdInfo in ThresholdList.items():
+			outFileNameBase = ThresholdInfo[0]
+			label = ThresholdInfo[1]
+			im = Image.open(outFileNameBase + "_" + str(ThresholdValue) + ".dft.png")#.resize((tileWidth,tileHeight), PIL.Image.NEAREST)
 			imOut.paste(im, (leftMargin + col*(tileWidth + margin) + margin, topMargin + row*(tileHeight + margin) + margin))
 			col = col + 1
 		row = row + 1
 
+	col = 0
+	for fileName, ThresholdInfo in ThresholdList.items():
+		label = ThresholdInfo[1]
+		im1.text((leftMargin + margin + col *(tileWidth + margin), 0), label, font = font1, align ="left", fill=(0))
+		col = col + 1
+
+	row = 0
+	for ThresholdValue in ThresholdValues:
+		im1.text((0, topMargin + margin + row * (tileHeight + margin)), str(ThresholdValue), font = font1, align ="left", fill=(0))
+		row = row + 1
 
 	imOut.save("out/_ThresholdDFT.png")
 
-# TODO: put labels on the diagrams.
+# TODO: kind of hard to see where the point sets end. maybe put a box around them? or a background color maybe?
 # TODO: why does STBN10_S_1.png have all the points at the bottom? seems like a bug. maybe related to void and cluster implementation. first 10% points initial binary pattern thing. maybe should threshold someone else's void and cluster.
+# TODO: why does purely spatial STBN not look the same as void and cluster? they should be equivelant.
+# TODO: put label on fiddusion and tellusim about whether they are S or ST.
 
 '''
 NOTES:
+* mention this is one way to use scalar blue noise textures, so only one measure of quality.
 * all DFTs normalized by same value: amplitude is divided by 6.2 to bring them all to be between 0 and 1.
 * stable-fiddusion was 64x64, resized thresholded images and DFTs to 128x128, but worked in 64x64.
 * Other blue noises came from:
  * https://tellusim.com/improved-blue-noise/
  * https://acko.net/blog/stable-fiddusion/
+ * void and cluster  https://github.com/Atrix256/VoidAndCluster.git
 '''
