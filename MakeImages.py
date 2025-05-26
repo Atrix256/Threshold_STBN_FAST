@@ -122,6 +122,11 @@ if MakeDiagrams:
 		for fileName, ThresholdInfo in ThresholdList.items():
 			outFileNameBase = ThresholdInfo[0]
 			im = Image.open(outFileNameBase + "_" + str(ThresholdValue) + ".png")#.resize((tileWidth,tileHeight), PIL.Image.NEAREST)
+			x1 = leftMargin + col*(tileWidth + margin) + margin - 1
+			y1 = topMargin + row*(tileHeight + margin) + margin - 1
+			x2 = x1 + im.width + 1
+			y2 = y1 + im.height + 1
+			im1.rectangle([(x1, y1),(x2, y2)], fill=(128))
 			imOut.paste(im, (leftMargin + col*(tileWidth + margin) + margin, topMargin + row*(tileHeight + margin) + margin))
 			col = col + 1
 		row = row + 1
@@ -179,10 +184,8 @@ if MakeDiagrams:
 
 	imOut.save("out/_ThresholdDFT.png")
 
-# TODO: kind of hard to see where the point sets end. maybe put a box around them? or a background color maybe?
 # TODO: why does STBN10_S_1.png have all the points at the bottom? seems like a bug. maybe related to void and cluster implementation. first 10% points initial binary pattern thing. maybe should threshold someone else's void and cluster.
 # TODO: why does purely spatial STBN not look the same as void and cluster? they should be equivelant.
-# TODO: put label on fiddusion and tellusim about whether they are S or ST.
 
 '''
 NOTES:
