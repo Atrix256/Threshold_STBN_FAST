@@ -34,7 +34,7 @@ ThresholdList = {
 	"Stable_Fiddusion/64x64_Crop.png" : ["out/Stable_Fiddusion", "Fiddusion ST"],
 }
 
-ThresholdValues = [1 , 2, 10, 26, 51, 77, 102, 128, 153, 179, 204, 230]
+ThresholdValues = [1 , 2, 10, 26, 51, 77, 102, 128, 153, 179, 204, 230, 245, 253, 254]
 
 DFTList = {
 	"FAST_Sigma1_0/real_uniform_gauss1_0.png" : ["out/FAST_S_Full.dft.png", "FAST S"],
@@ -198,11 +198,13 @@ if MakeDiagrams:
 
 	imOut.save("out/_ThresholdDFT.png")
 
-
-# TODO: why does purely spatial STBN not look the same as void and cluster? they should be equivelant. review how STBN works?
-
 '''
 NOTES:
+? why does purely spatial STBN not look the same as void and cluster? they should be equivelant. review how STBN works?
+ * i looked. should be the same but apparently isn't. implementation detail? unsure.
+* Link to stochastic transparency, and tease spatiotemporal point sets or no?
+ * Link as in say that this will happen directly
+ * Also that fast doesnt affect points outside of filter footprint (is gauss truncated?)
 * low sigma VNC has problems with sparsity. the algorithm seems like it shouldn't. my impl and "free blue noise textures" impl both show it.
 * tellusim was 16 bit greyscale png. I opened in gimp, changed it to 8 bit. told it to use "linear", not sRGB.
  * pretty much same difference.
@@ -219,6 +221,8 @@ NOTES:
   * and paper: https://cv.ulichney.com/papers/1993-void-cluster.pdf
 
 Conclusions:
+* good blue noise IMO has a darker center (no low frequencies left after filtering) and secondly, that center is as large as possible to push the noise to the highest frequencies only that it can.
+ * no proof this is best perceptually, just from a filtering perspective, this is easier to filter, and leaves more of the scene data (lower frequencies) intact.
 * mention this is one way to use scalar blue noise textures, so only one measure of quality of blue noise. "quality is as quality does"
 * None seem to really do well at sparse counts like <= 1 which is 0.4% density. More do well at <= 10, which is 4% density.
 * Fiddusion has a very dark center which is great for filtering, but it does poorly on thresholding.
